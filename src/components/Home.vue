@@ -69,10 +69,10 @@
     </section>
 
     <!-- Highlights 3D Carousel Section -->
-    <section class="q-pa-xl bg-grey-1">
+    <section class="q-pa-xl bg-black-6">
       <div class="text-center q-mb-xl">
-        <h2 class="text-h3 text-grey-8">Aspectos Destacados</h2>
-        <p class="text-h6 text-grey-6">Lo que hace especial su estadía en nuestro hotel</p>
+        <h2 class="text-h3 text-orange-8">Aspectos Destacados</h2>
+        <p class="text-h6 text-white-3">Lo que hace especial su estadía en nuestro hotel</p>
       </div>
 
       <div class="carousel-3d-container">
@@ -317,6 +317,7 @@ onUnmounted(() => {
   margin: 0 auto;
   background: #000000;
   border-radius: 15px;
+  box-shadow: 0 8px 25px rgb(255, 255, 255);
   overflow: hidden;
 }
 
