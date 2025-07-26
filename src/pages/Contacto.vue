@@ -28,108 +28,7 @@
       :animated="true"
     />
 
-    <!-- Formulario de Reservas -->
-    <section class="reservation-form-section q-pa-xl bg-grey-1">
-      <div class="container-lg">
-        <div class="text-center q-mb-xl">
-          <h2 class="text-h3 text-grey-8 q-mb-md">Formulario de Reservas</h2>
-          <p class="text-h6 text-grey-6">Complete sus datos y nos contactaremos en 24 horas</p>
-        </div>
 
-        <div class="row justify-center">
-          <div class="col-12 col-md-8">
-            <q-card class="reservation-card q-pa-lg">
-              <q-form @submit="handleFormSubmit" class="q-gutter-md">
-                <div class="row q-gutter-sm">
-                  <q-input
-                    v-model="form.name"
-                    label="Nombre completo *"
-                    outlined
-                    class="col-12 col-sm-6"
-                    :rules="[val => !!val || 'Requerido']"
-                  />
-                  <q-input
-                    v-model="form.email"
-                    label="Email *"
-                    type="email"
-                    outlined
-                    class="col-12 col-sm-6"
-                    :rules="[val => !!val || 'Requerido', val => /.+@.+\..+/.test(val) || 'Email inválido']"
-                  />
-                </div>
-
-                <div class="row q-gutter-sm">
-                  <q-input
-                    v-model="form.phone"
-                    label="Teléfono"
-                    outlined
-                    class="col-12 col-sm-6"
-                  />
-                  <q-select
-                    v-model="form.guests"
-                    label="Huéspedes"
-                    :options="[1,2,3,4,5,6,7,8]"
-                    outlined
-                    class="col-12 col-sm-6"
-                  />
-                </div>
-
-                <div class="row q-gutter-sm">
-                  <q-input
-                    v-model="form.checkIn"
-                    label="Check-in"
-                    type="date"
-                    outlined
-                    class="col-12 col-sm-6"
-                  />
-                  <q-input
-                    v-model="form.checkOut"
-                    label="Check-out"
-                    type="date"
-                    outlined
-                    class="col-12 col-sm-6"
-                  />
-                </div>
-
-                <q-select
-                  v-model="form.roomType"
-                  label="Tipo de habitación"
-                  :options="ROOM_OPTIONS"
-                  outlined
-                />
-
-                <q-input
-                  v-model="form.requests"
-                  label="Solicitudes especiales"
-                  type="textarea"
-                  outlined
-                  rows="3"
-                />
-
-                <q-btn
-                  type="submit"
-                  color="blue-6"
-                  icon="send"
-                  size="lg"
-                  unelevated
-                  :loading="isSubmitting"
-                  class="full-width q-mt-md"
-                >
-                  Enviar Solicitud
-                </q-btn>
-
-                <div class="text-center q-mt-md">
-                  <div class="text-body2 text-grey-6">
-                    <q-icon name="schedule" size="sm" class="q-mr-xs" />
-                    Respuesta garantizada en 24 horas
-                  </div>
-                </div>
-              </q-form>
-            </q-card>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- CTA Section -->
     <CTASection
@@ -138,7 +37,7 @@
       button-label="Hacer Reserva"
       button-color="blue-6"
       button-icon="calendar_today"
-      :button-click="scrollToForm"
+      button-to="/Reservas"
       theme="light"
       :animated="true"
     />
@@ -146,14 +45,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useQuasar } from 'quasar'
+import { computed } from 'vue'
 import HeroSection from '../components/HeroSection.vue'
 import BaseCarousel2D from '../components/BaseCarousel2D.vue'
 import StatsSection from '../components/StatsSection.vue'
 import CTASection from '../components/CTASection.vue'
-
-const $q = useQuasar()
 
 // Constants
 const HERO_BADGE = {
@@ -219,35 +115,13 @@ const STATS = [
   { id: 4, number: '★★★★★', label: 'Servicio Cliente' }
 ]
 
-const ROOM_OPTIONS = [
-  'Habitación Superior',
-  'Habitación Deluxe', 
-  'Junior Suite',
-  'Suite Colonial Premium',
-  'Suite Familiar',
-  'Suite Presidencial'
-]
-
-// State
-const isSubmitting = ref(false)
-const form = reactive({
-  name: '',
-  email: '',
-  phone: '',
-  checkIn: '',
-  checkOut: '',
-  guests: 2,
-  roomType: 'Habitación Superior',
-  requests: ''
-})
-
 // Computed
 const heroActions = computed(() => [
   {
     label: 'Reservar',
     variant: 'hero-primary',
     color: 'orange-8',
-    click: scrollToForm
+    to: '/Reservas'
   },
   {
     label: 'Contacto',
@@ -261,37 +135,6 @@ const heroActions = computed(() => [
 const handleHeroAction = ({ action }) => action.click?.()
 
 const handleContactClick = (method) => method.action?.()
-
-const handleFormSubmit = async () => {
-  try {
-    isSubmitting.value = true
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    $q.notify({
-      message: 'Solicitud enviada. Nos contactaremos pronto.',
-      color: 'positive',
-      icon: 'check_circle',
-      position: 'top'
-    })
-    
-    Object.assign(form, {
-      name: '', email: '', phone: '', checkIn: '', checkOut: '',
-      guests: 2, roomType: 'Habitación Superior', requests: ''
-    })
-  } catch (error) {
-    $q.notify({
-      message: 'Error al enviar. Intente nuevamente.',
-      color: 'negative',
-      position: 'top'
-    })
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-const scrollToForm = () => {
-  document.querySelector('.reservation-form-section')?.scrollIntoView({ behavior: 'smooth' })
-}
 </script>
 
 <style scoped>

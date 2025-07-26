@@ -32,7 +32,7 @@
         <BaseButton
           variant="reserve"
           label="Reservar"
-          to="/Contacto"
+          to="/Reservas"
           class="gt-sm q-ml-md"
         />
 
