@@ -243,26 +243,58 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import BaseButton from './components/BaseButton.vue'
-import { useScroll } from './composables/useScroll'
 import hotelConfig from './config/hotelConfig'
 
-// Composables
+// Composables básicos
 const route = useRoute()
 const router = useRouter()
-const { scrollY, scrollToTop: smoothScrollToTop } = useScroll()
+const $q = useQuasar()
 
 // Estado reactivo
 const mobileMenu = ref(false)
 const isLoading = ref(false)
 const transitionName = ref('fade')
+const scrollY = ref(0)
 
 // Configuración de navegación
 const navigation = computed(() => hotelConfig.NAVIGATION)
 const currentYear = computed(() => new Date().getFullYear())
 const showScrollTop = computed(() => scrollY.value > 300)
+
+// Funciones de scroll (reemplaza useScroll)
+const updateScrollPosition = () => {
+  scrollY.value = window.scrollY
+}
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+// Funciones de notificación (reemplaza useNotifications)
+const notify = (message, options = {}) => {
+  $q.notify({
+    message,
+    position: 'top',
+    timeout: 4000,
+    actions: [{ icon: 'close', color: 'white', round: true }],
+    ...options
+  })
+}
+
+const notifySuccess = (message) => {
+  notify(message, { color: 'positive', icon: 'check_circle' })
+}
+
+const notifyError = (message) => {
+  notify(message, { color: 'negative', icon: 'error', timeout: 6000 })
+}
 
 // Verificar si una ruta está activa
 const isActiveRoute = (path) => route.path === path
@@ -277,17 +309,13 @@ const getTransitionName = (to, from) => {
   return toIndex > fromIndex ? 'slide-left' : 'slide-right'
 }
 
-// Event handlers simplificados
+// Event handlers
 const toggleMobileMenu = () => {
   mobileMenu.value = !mobileMenu.value
 }
 
 const closeMobileMenu = () => {
   mobileMenu.value = false
-}
-
-const scrollToTop = () => {
-  smoothScrollToTop()
 }
 
 // Transition hooks
@@ -303,6 +331,23 @@ const onAfterEnter = () => {
 watch(route, (to, from) => {
   transitionName.value = getTransitionName(to.path, from.path)
   mobileMenu.value = false
+  
+  // Scroll to top when route changes
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+})
+
+// Lifecycle hooks
+onMounted(() => {
+  window.addEventListener('scroll', updateScrollPosition, { passive: true })
+  updateScrollPosition()
+  console.log('App mounted with hotel config:', hotelConfig.HOTEL_INFO.name)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrollPosition)
 })
 
 // Navigation guard para tracking
@@ -310,11 +355,8 @@ router.beforeEach((to, from, next) => {
   console.log('Navigating to:', to.name)
   next()
 })
-
-onMounted(() => {
-  console.log('App mounted with hotel config:', hotelConfig.HOTEL_INFO.name)
-})
 </script>
+
 <style scoped>
 .main-layout {
   min-height: 100vh;

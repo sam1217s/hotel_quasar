@@ -207,7 +207,7 @@ const props = defineProps({
   formSubtitle: String,
   
   // Configuración de campos automáticos
-  fields: Array, // [{ name, type, label, placeholder, rules, options, etc. }]
+  fields: Array,
   modelValue: {
     type: Object,
     default: () => ({})
@@ -276,7 +276,7 @@ const props = defineProps({
   cancelButtonClass: String,
   
   // Nota del formulario
-  formNote: Object, // { text: '', icon: '' }
+  formNote: Object,
   
   // Estado de carga
   loading: Boolean
@@ -286,6 +286,25 @@ const emit = defineEmits(['submit', 'cancel', 'update:modelValue', 'field-change
 
 const isSubmitting = ref(false)
 const formData = reactive({ ...props.modelValue })
+
+// Funciones de notificación (reemplaza useNotifications)
+const notify = (message, options = {}) => {
+  $q.notify({
+    message,
+    position: 'top',
+    timeout: 4000,
+    actions: [{ icon: 'close', color: 'white', round: true }],
+    ...options
+  })
+}
+
+const notifySuccess = (message) => {
+  notify(message, { color: 'positive', icon: 'check_circle' })
+}
+
+const notifyError = (message) => {
+  notify(message, { color: 'negative', icon: 'error', timeout: 6000 })
+}
 
 // Configuraciones de tema
 const themeConfig = {
@@ -338,25 +357,12 @@ const handleSubmit = async () => {
   try {
     await emit('submit', { ...formData })
     
-    // Mostrar notificación de éxito si no se especifica lo contrario
     if (!props.loading) {
-      $q.notify({
-        message: 'Formulario enviado exitosamente',
-        color: 'positive',
-        icon: 'check_circle',
-        position: 'top',
-        timeout: 3000
-      })
+      notifySuccess('Formulario enviado exitosamente')
     }
   } catch (error) {
     console.error('Error submitting form:', error)
-    
-    $q.notify({
-      message: 'Error al enviar el formulario. Inténtelo nuevamente.',
-      color: 'negative',
-      icon: 'error',
-      position: 'top'
-    })
+    notifyError('Error al enviar el formulario. Inténtelo nuevamente.')
   } finally {
     if (!props.loading) {
       isSubmitting.value = false

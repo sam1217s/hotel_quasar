@@ -23,8 +23,8 @@ export const HOTEL_INFO = {
 export const CONTACT_INFO = {
   phone: {
     main: '+57 605 123 4567',
-    whatsapp: '+57 312 345 6789',
-    international: '+57 605 123 4567'
+    whatsapp: '+57 300 169 5629',
+    international: '+57 123 123 4567'
   },
   email: {
     reservations: 'reservas@refugioreal.com',
@@ -75,22 +75,7 @@ export const THEME_CONFIG = {
   }
 }
 
-// Configuración de navegación
-export const NAVIGATION = {
-  main: [
-    { path: '/', label: 'Inicio', icon: 'home' },
-    { path: '/Habitaciones', label: 'Habitaciones', icon: 'bed' },
-    { path: '/Restaurantes', label: 'Restaurantes', icon: 'restaurant' },
-    { path: '/Bienestar', label: 'Bienestar', icon: 'spa' },
-    { path: '/DeportesExtremos', label: 'Deportes Extremos', icon: 'sports_handball' },
-    { path: '/Contacto', label: 'Contacto', icon: 'contact_mail' }
-  ],
-  footer: [
-    { path: '/privacidad', label: 'Privacidad' },
-    { path: '/terminos', label: 'Términos' },
-    { path: '/cookies', label: 'Cookies' }
-  ]
-}
+
 
 // Estadísticas del hotel
 export const HOTEL_STATS = {
