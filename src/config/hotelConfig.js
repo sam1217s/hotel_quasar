@@ -4,7 +4,7 @@
  */
 
 // Información básica del hotel
-export const HOTEL_INFO = {
+const HOTEL_INFO = {
   name: 'El Refugio Real del Caribe',
   shortName: 'Refugio Real',
   tagline: 'Lujo colonial frente al mar Caribe',
@@ -20,11 +20,11 @@ export const HOTEL_INFO = {
 }
 
 // Información de contacto
-export const CONTACT_INFO = {
+const CONTACT_INFO = {
   phone: {
     main: '+57 605 123 4567',
-    whatsapp: '+57 300 169 5629',
-    international: '+57 123 123 4567'
+    whatsapp: '+57 312 345 6789',
+    international: '+57 605 123 4567'
   },
   email: {
     reservations: 'reservas@refugioreal.com',
@@ -46,7 +46,7 @@ export const CONTACT_INFO = {
 }
 
 // Configuraciones de tema y colores
-export const THEME_CONFIG = {
+const THEME_CONFIG = {
   primary: {
     brown: '#8D4513',
     lightBrown: '#A0522D',
@@ -75,10 +75,25 @@ export const THEME_CONFIG = {
   }
 }
 
-
+// Configuración de navegación
+const NAVIGATION = {
+  main: [
+    { path: '/', label: 'Inicio', icon: 'home' },
+    { path: '/Habitaciones', label: 'Habitaciones', icon: 'bed' },
+    { path: '/Restaurantes', label: 'Restaurantes', icon: 'restaurant' },
+    { path: '/Bienestar', label: 'Bienestar', icon: 'spa' },
+    { path: '/DeportesExtremos', label: 'Deportes Extremos', icon: 'sports_handball' },
+    { path: '/Contacto', label: 'Contacto', icon: 'contact_mail' }
+  ],
+  footer: [
+    { path: '/privacidad', label: 'Privacidad' },
+    { path: '/terminos', label: 'Términos' },
+    { path: '/cookies', label: 'Cookies' }
+  ]
+}
 
 // Estadísticas del hotel
-export const HOTEL_STATS = {
+const HOTEL_STATS = {
   rooms: {
     total: 122,
     suites: 12,
@@ -104,7 +119,7 @@ export const HOTEL_STATS = {
 }
 
 // Configuración de servicios
-export const SERVICES_CONFIG = {
+const SERVICES_CONFIG = {
   roomService: '24/7',
   concierge: '24/7',
   spa: {
@@ -121,7 +136,7 @@ export const SERVICES_CONFIG = {
 }
 
 // Configuración de precios (rangos)
-export const PRICING_CONFIG = {
+const PRICING_CONFIG = {
   rooms: {
     superior: { min: 360, max: 480 },
     deluxe: { min: 420, max: 580 },
@@ -134,7 +149,7 @@ export const PRICING_CONFIG = {
 }
 
 // Configuración de formularios
-export const FORM_CONFIG = {
+const FORM_CONFIG = {
   validation: {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     phone: /^[\+]?[1-9][\d]{0,15}$/,
@@ -154,7 +169,7 @@ export const FORM_CONFIG = {
 }
 
 // Configuración de carruseles y animaciones
-export const ANIMATION_CONFIG = {
+const ANIMATION_CONFIG = {
   carousel2d: {
     autoplayDelay: 4000,
     height: '500px',
@@ -177,7 +192,7 @@ export const ANIMATION_CONFIG = {
 }
 
 // Configuración de notificaciones
-export const NOTIFICATION_CONFIG = {
+const NOTIFICATION_CONFIG = {
   position: 'top',
   timeout: {
     success: 4000,
@@ -195,7 +210,7 @@ export const NOTIFICATION_CONFIG = {
 }
 
 // URLs de imágenes por defecto
-export const DEFAULT_IMAGES = {
+const DEFAULT_IMAGES = {
   hero: {
     home: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&h=600&fit=crop',
     rooms: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200&h=600&fit=crop',
@@ -209,7 +224,7 @@ export const DEFAULT_IMAGES = {
 }
 
 // Configuración de SEO
-export const SEO_CONFIG = {
+const SEO_CONFIG = {
   title: {
     base: 'Sofitel Legend Santa Clara',
     separator: ' | ',
@@ -238,7 +253,7 @@ export const SEO_CONFIG = {
 }
 
 // Configuración de breakpoints responsivos
-export const BREAKPOINTS = {
+const BREAKPOINTS = {
   xs: 480,
   sm: 768,
   md: 1024,
@@ -247,7 +262,7 @@ export const BREAKPOINTS = {
 }
 
 // Mensajes y textos predefinidos
-export const MESSAGES = {
+const MESSAGES = {
   loading: {
     default: 'Cargando...',
     form: 'Enviando formulario...',
@@ -275,7 +290,7 @@ export const MESSAGES = {
 }
 
 // Configuración de utilidades
-export const UTILITIES = {
+const UTILITIES = {
   formatters: {
     currency: (amount, currency = 'USD') => {
       return new Intl.NumberFormat('es-CO', {
@@ -297,7 +312,26 @@ export const UTILITIES = {
   }
 }
 
-// Export por defecto con toda la configuración
+// Named exports
+export {
+  HOTEL_INFO,
+  CONTACT_INFO,
+  THEME_CONFIG,
+  NAVIGATION,
+  HOTEL_STATS,
+  SERVICES_CONFIG,
+  PRICING_CONFIG,
+  FORM_CONFIG,
+  ANIMATION_CONFIG,
+  NOTIFICATION_CONFIG,
+  DEFAULT_IMAGES,
+  SEO_CONFIG,
+  BREAKPOINTS,
+  MESSAGES,
+  UTILITIES
+}
+
+// Default export
 export default {
   HOTEL_INFO,
   CONTACT_INFO,
