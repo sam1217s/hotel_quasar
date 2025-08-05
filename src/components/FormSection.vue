@@ -1,503 +1,1031 @@
 <template>
-  <section class="form-section q-pa-xl" :class="sectionClass" :style="sectionStyle">
-    <!-- Título opcional -->
-    <div v-if="title || subtitle" class="text-center q-mb-xl">
-      <h2 v-if="title" class="text-h4" :class="titleClass">{{ title }}</h2>
-      <p v-if="subtitle" class="text-h6" :class="subtitleClass">{{ subtitle }}</p>
-    </div>
+  <footer 
+    class="luxury-footer"
+    :class="[
+      `luxury-footer--${variant}`,
+      `luxury-footer--${theme}`
+    ]"
+    role="contentinfo"
+  >
     
-    <div class="row justify-center">
-      <div :class="formContainerClass">
-        <q-card class="form-card" :flat="flat" :bordered="bordered">
-          <q-card-section :class="['q-pa-xl', cardSectionClass]">
-            <!-- Encabezado del formulario -->
-            <div v-if="formTitle || formSubtitle" class="form-header q-mb-lg text-center">
-              <h3 v-if="formTitle" class="text-h5 text-grey-8 q-mb-sm">{{ formTitle }}</h3>
-              <p v-if="formSubtitle" class="text-body1 text-grey-6">{{ formSubtitle }}</p>
+    <!-- Sección principal del footer -->
+    <div class="footer-main">
+      <div class="footer-container">
+        
+        <!-- Newsletter Section -->
+        <section class="footer-newsletter" v-if="showNewsletter">
+          <div class="newsletter-content">
+            <div class="newsletter-text">
+              <h2 class="newsletter-title">Experiencias Exclusivas</h2>
+              <p class="newsletter-description">
+                Reciba ofertas especiales, eventos únicos y experiencias exclusivas 
+                directamente en su correo electrónico.
+              </p>
             </div>
-
-            <!-- Formulario -->
-            <form @submit.prevent="handleSubmit" class="form-content">
-              <!-- Contenido del formulario via slots -->
-              <div v-if="$slots.default" class="form-fields">
-                <slot />
+            
+            <form 
+              @submit.prevent="handleNewsletterSubmit" 
+              class="newsletter-form"
+              novalidate
+            >
+              <div class="newsletter-input-group">
+                <div class="input-container">
+                  <q-icon name="email" class="input-icon" />
+                  <input
+                    v-model="newsletterEmail"
+                    type="email"
+                    placeholder="Su correo electrónico"
+                    class="newsletter-input"
+                    :class="{ 'input-error': newsletterError }"
+                    required
+                    aria-label="Correo electrónico para newsletter"
+                  />
+                </div>
+                <BaseButton
+                  type="submit"
+                  variant="primary"
+                  label="Suscribirse"
+                  icon="send"
+                  :loading="newsletterLoading"
+                  size="lg"
+                  class="newsletter-btn"
+                />
               </div>
-
-              <!-- Campos generados automáticamente -->
-              <div v-else-if="fields && fields.length" class="form-fields">
-                <div 
-                  v-for="(field, index) in fields" 
-                  :key="field.name || index"
-                  :class="getFieldContainerClass(field)"
-                >
-                  <!-- Input de texto -->
-                  <q-input
-                    v-if="field.type === 'text' || field.type === 'email' || field.type === 'tel'"
-                    v-model="formData[field.name]"
-                    :type="field.type"
-                    :label="field.label"
-                    :placeholder="field.placeholder"
-                    :rules="field.rules"
-                    :outlined="outlined"
-                    :filled="filled"
-                    :dense="dense"
-                    :readonly="field.readonly"
-                    :disable="field.disable"
-                    :class="['form-input', field.class]"
-                  />
-
-                  <!-- Textarea -->
-                  <q-input
-                    v-else-if="field.type === 'textarea'"
-                    v-model="formData[field.name]"
-                    type="textarea"
-                    :label="field.label"
-                    :placeholder="field.placeholder"
-                    :rules="field.rules"
-                    :rows="field.rows || 4"
-                    :outlined="outlined"
-                    :filled="filled"
-                    :dense="dense"
-                    :readonly="field.readonly"
-                    :disable="field.disable"
-                    :class="['form-input', field.class]"
-                  />
-
-                  <!-- Select -->
-                  <q-select
-                    v-else-if="field.type === 'select'"
-                    v-model="formData[field.name]"
-                    :options="field.options"
-                    :label="field.label"
-                    :rules="field.rules"
-                    :outlined="outlined"
-                    :filled="filled"
-                    :dense="dense"
-                    :readonly="field.readonly"
-                    :disable="field.disable"
-                    :class="['form-input', field.class]"
-                  />
-
-                  <!-- Date -->
-                  <q-input
-                    v-else-if="field.type === 'date'"
-                    v-model="formData[field.name]"
-                    type="date"
-                    :label="field.label"
-                    :rules="field.rules"
-                    :outlined="outlined"
-                    :filled="filled"
-                    :dense="dense"
-                    :readonly="field.readonly"
-                    :disable="field.disable"
-                    :class="['form-input', field.class]"
-                  />
-
-                  <!-- Number -->
-                  <q-input
-                    v-else-if="field.type === 'number'"
-                    v-model.number="formData[field.name]"
-                    type="number"
-                    :label="field.label"
-                    :min="field.min"
-                    :max="field.max"
-                    :step="field.step"
-                    :rules="field.rules"
-                    :outlined="outlined"
-                    :filled="filled"
-                    :dense="dense"
-                    :readonly="field.readonly"
-                    :disable="field.disable"
-                    :class="['form-input', field.class]"
-                  />
-
-                  <!-- Checkbox -->
-                  <q-checkbox
-                    v-else-if="field.type === 'checkbox'"
-                    v-model="formData[field.name]"
-                    :label="field.label"
-                    :color="field.color || 'brown-7'"
-                    :disable="field.disable"
-                    :class="['form-checkbox', field.class]"
-                  />
-
-                  <!-- Radio -->
-                  <q-radio
-                    v-else-if="field.type === 'radio'"
-                    v-model="formData[field.name]"
-                    :val="field.value"
-                    :label="field.label"
-                    :color="field.color || 'brown-7'"
-                    :disable="field.disable"
-                    :class="['form-radio', field.class]"
-                  />
-                </div>
+              <div v-if="newsletterError" class="newsletter-error">
+                {{ newsletterError }}
               </div>
-
-              <!-- Acciones del formulario -->
-              <div class="form-actions text-center q-mt-xl">
-                <!-- Slot para acciones personalizadas -->
-                <div v-if="$slots.actions">
-                  <slot name="actions" :is-submitting="isSubmitting" :form-data="formData" />
-                </div>
-                
-                <!-- Botones por defecto -->
-                <div v-else class="default-actions">
-                  <BaseButton
-                    type="submit"
-                    :variant="submitButtonVariant"
-                    :color="submitButtonColor"
-                    :label="submitButtonText"
-                    :icon="submitButtonIcon"
-                    :loading="isSubmitting"
-                    :size="submitButtonSize"
-                    :class="['submit-btn', submitButtonClass]"
-                  />
-                  
-                  <BaseButton
-                    v-if="showCancelButton"
-                    :variant="cancelButtonVariant"
-                    :color="cancelButtonColor"
-                    :label="cancelButtonText"
-                    :icon="cancelButtonIcon"
-                    :size="cancelButtonSize"
-                    :class="['cancel-btn q-ml-md', cancelButtonClass]"
-                    @click="handleCancel"
-                  />
-                </div>
-
-                <!-- Nota adicional -->
-                <div v-if="formNote" class="form-note q-mt-md">
-                  <div class="text-body2 text-grey-6">
-                    <q-icon v-if="formNote.icon" :name="formNote.icon" size="sm" class="q-mr-xs" />
-                    {{ formNote.text }}
-                  </div>
-                </div>
+              <div v-if="newsletterSuccess" class="newsletter-success">
+                ¡Gracias por suscribirse! Recibirá nuestras mejores ofertas.
               </div>
             </form>
-          </q-card-section>
-        </q-card>
+          </div>
+        </section>
+
+        <!-- Contenido principal del footer -->
+        <div class="footer-content">
+          
+          <!-- Información del hotel -->
+          <div class="footer-section footer-about">
+            <div class="footer-brand">
+              <div class="brand-logo">
+                <img 
+                  :src="hotelConfig.DEFAULT_IMAGES.logo" 
+                  :alt="hotelConfig.HOTEL_INFO.shortName"
+                  class="logo-image"
+                />
+              </div>
+              <div class="brand-info">
+                <h3 class="brand-name">{{ hotelConfig.HOTEL_INFO.name }}</h3>
+                <p class="brand-tagline">{{ hotelConfig.HOTEL_INFO.tagline }}</p>
+              </div>
+            </div>
+            
+            <p class="hotel-description">
+              Un refugio de lujo en el corazón del Centro Histórico de Cartagena, 
+              donde la historia colonial se encuentra con la hospitalidad francesa 
+              más refinada para crear experiencias inolvidables.
+            </p>
+            
+            <!-- Certificaciones -->
+            <div class="certifications">
+              <div class="cert-badge" v-for="cert in certifications" :key="cert.name">
+                <q-icon :name="cert.icon" class="cert-icon" />
+                <span class="cert-text">{{ cert.name }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enlaces rápidos -->
+          <nav class="footer-section footer-links" role="navigation" aria-label="Enlaces del sitio">
+            <h4 class="section-title">Navegación</h4>
+            <ul class="links-list">
+              <li v-for="link in navigationLinks" :key="link.path">
+                <router-link 
+                  :to="link.path" 
+                  class="footer-link"
+                  @click="trackFooterClick('navigation', link.label)"
+                >
+                  <q-icon :name="link.icon" class="link-icon" />
+                  <span>{{ link.label }}</span>
+                </router-link>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Servicios -->
+          <div class="footer-section footer-services">
+            <h4 class="section-title">Servicios</h4>
+            <ul class="links-list">
+              <li v-for="service in serviceLinks" :key="service.path">
+                <router-link 
+                  :to="service.path" 
+                  class="footer-link"
+                  @click="trackFooterClick('services', service.label)"
+                >
+                  {{ service.label }}
+                </router-link>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Información de contacto -->
+          <div class="footer-section footer-contact">
+            <h4 class="section-title">Contacto</h4>
+            
+            <div class="contact-info">
+              <!-- Dirección -->
+              <div class="contact-item">
+                <q-icon name="place" class="contact-icon" />
+                <div class="contact-content">
+                  <span class="contact-label">Dirección</span>
+                  <address class="contact-value">
+                    {{ hotelConfig.CONTACT_INFO.address || hotelConfig.HOTEL_INFO.location.fullAddress }}
+                  </address>
+                </div>
+              </div>
+
+              <!-- Teléfono -->
+              <div class="contact-item">
+                <q-icon name="phone" class="contact-icon" />
+                <div class="contact-content">
+                  <span class="contact-label">Reservas</span>
+                  <a 
+                    :href="`tel:${hotelConfig.CONTACT_INFO.phone.main}`" 
+                    class="contact-value contact-link"
+                    @click="trackFooterClick('contact', 'phone')"
+                  >
+                    {{ hotelConfig.CONTACT_INFO.phone.main }}
+                  </a>
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="contact-item">
+                <q-icon name="email" class="contact-icon" />
+                <div class="contact-content">
+                  <span class="contact-label">Email</span>
+                  <a 
+                    :href="`mailto:${hotelConfig.CONTACT_INFO.email.reservations}`" 
+                    class="contact-value contact-link"
+                    @click="trackFooterClick('contact', 'email')"
+                  >
+                    {{ hotelConfig.CONTACT_INFO.email.reservations }}
+                  </a>
+                </div>
+              </div>
+
+              <!-- Horarios -->
+              <div class="contact-item">
+                <q-icon name="schedule" class="contact-icon" />
+                <div class="contact-content">
+                  <span class="contact-label">Concierge</span>
+                  <span class="contact-value">
+                    {{ hotelConfig.SERVICES_CONFIG.concierge }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Redes sociales -->
+            <div class="social-links">
+              <h5 class="social-title">Síguenos</h5>
+              <div class="social-icons">
+                <a 
+                  v-for="social in socialLinks" 
+                  :key="social.name"
+                  :href="social.url" 
+                  class="social-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="`Seguir en ${social.name}`"
+                  @click="trackFooterClick('social', social.name)"
+                >
+                  <q-icon :name="social.icon" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+
+    <!-- Footer bottom -->
+    <div class="footer-bottom">
+      <div class="footer-container">
+        <div class="footer-bottom-content">
+          
+          <!-- Copyright -->
+          <div class="copyright">
+            <p>
+              © {{ currentYear }} {{ hotelConfig.HOTEL_INFO.name }}. 
+              Todos los derechos reservados.
+            </p>
+            <p class="copyright-detail">
+              Diseñado con ❤️ para crear experiencias únicas en Cartagena de Indias.
+            </p>
+          </div>
+
+          <!-- Enlaces legales -->
+          <nav class="legal-links" role="navigation" aria-label="Enlaces legales">
+            <ul class="legal-list">
+              <li v-for="legal in legalLinks" :key="legal.path">
+                <router-link 
+                  :to="legal.path" 
+                  class="legal-link"
+                  @click="trackFooterClick('legal', legal.label)"
+                >
+                  {{ legal.label }}
+                </router-link>
+              </li>
+            </ul>
+          </nav>
+
+          <!-- Información adicional -->
+          <div class="additional-info">
+            <div class="awards">
+              <span class="award-text">Miembro de</span>
+              <div class="award-badges">
+                <span class="award-badge">Leading Hotels</span>
+                <span class="award-badge">Green Key</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón de scroll to top -->
+    <button 
+      v-if="showScrollTop"
+      class="scroll-top-btn"
+      @click="scrollToTop"
+      aria-label="Volver arriba"
+      :class="{ 'scroll-top-btn--visible': showScrollTop }"
+    >
+      <q-icon name="keyboard_arrow_up" />
+    </button>
+
+  </footer>
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch } from 'vue'
-import { useQuasar } from 'quasar'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseButton from './BaseButton.vue'
+import hotelConfig from '../config/hotelConfig'
 
-const $q = useQuasar()
+const router = useRouter()
 
 const props = defineProps({
-  // Configuración de la sección
-  title: String,
-  subtitle: String,
-  titleClass: {
+  variant: {
     type: String,
-    default: 'text-grey-8'
+    default: 'luxury',
+    validator: (value) => ['luxury', 'minimal', 'elegant'].includes(value)
   },
-  subtitleClass: {
-    type: String,
-    default: 'text-grey-6'
-  },
-  
-  // Configuración del formulario
-  formTitle: String,
-  formSubtitle: String,
-  
-  // Configuración de campos automáticos
-  fields: Array,
-  modelValue: {
-    type: Object,
-    default: () => ({})
-  },
-  
-  // Estilos
   theme: {
     type: String,
-    default: 'light'
+    default: 'dark',
+    validator: (value) => ['dark', 'light'].includes(value)
   },
-  sectionClass: String,
-  formContainerClass: {
-    type: String,
-    default: 'col-lg-8 col-md-10 col-sm-12 col-xs-12'
-  },
-  cardSectionClass: String,
-  
-  // Configuración de inputs
-  outlined: {
+  showNewsletter: {
     type: Boolean,
     default: true
-  },
-  filled: Boolean,
-  dense: Boolean,
-  flat: Boolean,
-  bordered: {
-    type: Boolean,
-    default: true
-  },
-  
-  // Configuración de botones
-  submitButtonText: {
-    type: String,
-    default: 'Enviar'
-  },
-  submitButtonVariant: {
-    type: String,
-    default: 'cta'
-  },
-  submitButtonColor: {
-    type: String,
-    default: 'blue-6'
-  },
-  submitButtonIcon: String,
-  submitButtonSize: {
-    type: String,
-    default: 'lg'
-  },
-  submitButtonClass: String,
-  
-  showCancelButton: Boolean,
-  cancelButtonText: {
-    type: String,
-    default: 'Cancelar'
-  },
-  cancelButtonVariant: {
-    type: String,
-    default: 'secondary'
-  },
-  cancelButtonColor: String,
-  cancelButtonIcon: String,
-  cancelButtonSize: {
-    type: String,
-    default: 'lg'
-  },
-  cancelButtonClass: String,
-  
-  // Nota del formulario
-  formNote: Object,
-  
-  // Estado de carga
-  loading: Boolean
-})
-
-const emit = defineEmits(['submit', 'cancel', 'update:modelValue', 'field-change'])
-
-const isSubmitting = ref(false)
-const formData = reactive({ ...props.modelValue })
-
-// Funciones de notificación (reemplaza useNotifications)
-const notify = (message, options = {}) => {
-  $q.notify({
-    message,
-    position: 'top',
-    timeout: 4000,
-    actions: [{ icon: 'close', color: 'white', round: true }],
-    ...options
-  })
-}
-
-const notifySuccess = (message) => {
-  notify(message, { color: 'positive', icon: 'check_circle' })
-}
-
-const notifyError = (message) => {
-  notify(message, { color: 'negative', icon: 'error', timeout: 6000 })
-}
-
-// Configuraciones de tema
-const themeConfig = {
-  light: {
-    background: '#f8f9fa',
-    titleColor: 'text-grey-8',
-    subtitleColor: 'text-grey-6'
-  },
-  dark: {
-    background: 'linear-gradient(135deg, #2c2c2c, #1a1a1a)',
-    titleColor: 'text-white',
-    subtitleColor: 'text-grey-4'
-  },
-  primary: {
-    background: 'linear-gradient(135deg, rgba(141, 69, 19, 0.05), rgba(160, 82, 45, 0.02))',
-    titleColor: 'text-grey-8',
-    subtitleColor: 'text-grey-6'
   }
-}
-
-const sectionStyle = computed(() => {
-  const config = themeConfig[props.theme]
-  return config ? { background: config.background } : {}
 })
 
-// Clase para contenedor de campo
-const getFieldContainerClass = (field) => {
-  const baseClass = field.containerClass || ''
-  const sizeClass = field.size || 'col-12'
-  return `${sizeClass} ${baseClass}`.trim()
-}
+const emit = defineEmits(['newsletter-submit', 'footer-click'])
 
-// Watchers
-watch(() => props.modelValue, (newValue) => {
-  Object.assign(formData, newValue)
-}, { deep: true })
+// Estado reactivo
+const newsletterEmail = ref('')
+const newsletterLoading = ref(false)
+const newsletterError = ref('')
+const newsletterSuccess = ref(false)
+const showScrollTop = ref(false)
+const scrollY = ref(0)
 
-watch(formData, (newValue) => {
-  emit('update:modelValue', { ...newValue })
-}, { deep: true })
+// Año actual
+const currentYear = computed(() => new Date().getFullYear())
 
-watch(() => props.loading, (newValue) => {
-  isSubmitting.value = newValue
-})
+// Certificaciones
+const certifications = ref([
+  { name: 'Green Key', icon: 'eco' },
+  { name: 'Leading Hotels', icon: 'star' },
+  { name: 'Forbes Approved', icon: 'verified' }
+])
 
-// Event handlers
-const handleSubmit = async () => {
-  isSubmitting.value = true
-  
+// Enlaces de navegación
+const navigationLinks = computed(() => hotelConfig.NAVIGATION.main)
+
+// Enlaces de servicios
+const serviceLinks = ref([
+  { path: '/spa-wellness', label: 'Spa & Wellness' },
+  { path: '/concierge', label: 'Concierge 24/7' },
+  { path: '/eventos', label: 'Eventos Privados' },
+  { path: '/transporte', label: 'Transporte Premium' },
+  { path: '/experiencias', label: 'Experiencias Únicas' }
+])
+
+// Enlaces legales
+const legalLinks = ref([
+  { path: '/politica-privacidad', label: 'Política de Privacidad' },
+  { path: '/terminos-condiciones', label: 'Términos y Condiciones' },
+  { path: '/politica-cookies', label: 'Política de Cookies' },
+  { path: '/politica-cancelacion', label: 'Política de Cancelación' }
+])
+
+// Enlaces sociales
+const socialLinks = ref([
+  { 
+    name: 'Facebook', 
+    icon: 'facebook', 
+    url: hotelConfig.CONTACT_INFO.social?.facebook || '#' 
+  },
+  { 
+    name: 'Instagram', 
+    icon: 'instagram', 
+    url: hotelConfig.CONTACT_INFO.social?.instagram || '#' 
+  },
+  { 
+    name: 'Twitter', 
+    icon: 'twitter', 
+    url: hotelConfig.CONTACT_INFO.social?.twitter || '#' 
+  },
+  { 
+    name: 'LinkedIn', 
+    icon: 'linkedin', 
+    url: 'https://linkedin.com/company/refugio-real-caribe' 
+  }
+])
+
+// Funciones
+const handleNewsletterSubmit = async () => {
+  newsletterError.value = ''
+  newsletterSuccess.value = false
+
+  // Validación básica
+  if (!newsletterEmail.value) {
+    newsletterError.value = 'Por favor, ingrese su correo electrónico'
+    return
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(newsletterEmail.value)) {
+    newsletterError.value = 'Por favor, ingrese un correo electrónico válido'
+    return
+  }
+
+  newsletterLoading.value = true
+
   try {
-    await emit('submit', { ...formData })
+    // Simular envío
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
-    if (!props.loading) {
-      notifySuccess('Formulario enviado exitosamente')
-    }
+    emit('newsletter-submit', {
+      email: newsletterEmail.value,
+      timestamp: new Date().toISOString()
+    })
+
+    newsletterSuccess.value = true
+    newsletterEmail.value = ''
+    
+    // Ocultar mensaje de éxito después de 5 segundos
+    setTimeout(() => {
+      newsletterSuccess.value = false
+    }, 5000)
+
   } catch (error) {
-    console.error('Error submitting form:', error)
-    notifyError('Error al enviar el formulario. Inténtelo nuevamente.')
+    newsletterError.value = 'Error al procesar la suscripción. Inténtelo nuevamente.'
   } finally {
-    if (!props.loading) {
-      isSubmitting.value = false
-    }
+    newsletterLoading.value = false
   }
 }
 
-const handleCancel = () => {
-  emit('cancel')
+const trackFooterClick = (category, label) => {
+  emit('footer-click', { category, label })
+  console.log(`Footer click: ${category} - ${label}`)
 }
 
-const resetForm = () => {
-  Object.keys(formData).forEach(key => {
-    delete formData[key]
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
   })
-  Object.assign(formData, props.modelValue)
+  trackFooterClick('action', 'scroll_to_top')
 }
 
-const setFieldValue = (fieldName, value) => {
-  formData[fieldName] = value
-  emit('field-change', { field: fieldName, value })
+const updateScrollState = () => {
+  scrollY.value = window.scrollY
+  showScrollTop.value = scrollY.value > 500
 }
 
-// Exponer métodos públicos
-defineExpose({
-  resetForm,
-  setFieldValue,
-  formData
+// Lifecycle
+onMounted(() => {
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+  updateScrollState()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateScrollState)
 })
 </script>
 
 <style scoped>
-.form-section {
-  background: #f8f9fa;
+/* Footer principal */
+.luxury-footer {
+  background: var(--gradient-luxury, linear-gradient(135deg, #1a1a1a, #2d2d2d));
+  color: white;
+  position: relative;
+  margin-top: auto;
 }
 
-.form-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+.luxury-footer--light {
+  background: var(--luxury-background, #fefcf8);
+  color: var(--luxury-text-primary, #1a1a1a);
 }
 
-.form-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl, 2rem);
 }
 
-.form-header {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+/* Newsletter Section */
+.footer-newsletter {
+  padding: var(--space-4xl, 6rem) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
-.form-content {
-  max-width: 100%;
+.footer-newsletter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212, 165, 116, 0.1) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.form-fields {
+.newsletter-content {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4xl, 6rem);
+  align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
-.form-fields .col-12 {
-  grid-column: span 12;
+.newsletter-title {
+  font-family: var(--font-family-display, 'Playfair Display', serif);
+  font-size: var(--text-4xl, 2.25rem);
+  font-weight: 300;
+  color: white;
+  margin-bottom: var(--space-lg, 1.5rem);
+  line-height: 1.2;
 }
 
-.form-fields .col-6 {
-  grid-column: span 6;
+.newsletter-description {
+  font-size: var(--text-lg, 1.125rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
 }
 
-.form-fields .col-4 {
-  grid-column: span 4;
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md, 1rem);
 }
 
-.form-fields .col-3 {
-  grid-column: span 3;
+.newsletter-input-group {
+  display: flex;
+  gap: var(--space-md, 1rem);
+  align-items: flex-start;
 }
 
-.form-input {
-  margin-bottom: 1rem;
-  transition: all 0.3s ease;
+.input-container {
+  position: relative;
+  flex: 1;
 }
 
-.form-checkbox,
-.form-radio {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
+.input-icon {
+  position: absolute;
+  left: var(--space-lg, 1.5rem);
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.25rem;
+  z-index: 2;
 }
 
-.form-actions {
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+.newsletter-input {
+  width: 100%;
+  padding: var(--space-lg, 1.5rem) var(--space-lg, 1.5rem) var(--space-lg, 1.5rem) 3.5rem;
+  font-size: var(--text-base, 1rem);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xl, 1rem);
+  color: white;
+  transition: all var(--transition-base, 0.3s ease);
 }
 
-.submit-btn {
-  min-width: 200px;
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletter-input:focus {
+  outline: none;
+  border-color: var(--luxury-accent, #d4a574);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+}
+
+.newsletter-input.input-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.newsletter-btn {
+  background: var(--gradient-gold, linear-gradient(90deg, #D4A574, #8B4513));
+  border: none;
+  color: white;
   font-weight: 600;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-xl, 1rem);
+  padding: var(--space-lg, 1.5rem) var(--space-2xl, 3rem);
+  white-space: nowrap;
 }
 
-.submit-btn:hover {
+.newsletter-error {
+  color: #ef4444;
+  font-size: var(--text-sm, 0.875rem);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+}
+
+.newsletter-success {
+  color: #22c55e;
+  font-size: var(--text-sm, 0.875rem);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+}
+
+/* Contenido principal */
+.footer-main {
+  padding: var(--space-4xl, 6rem) 0 var(--space-2xl, 3rem);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: var(--space-4xl, 6rem);
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sección sobre el hotel */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg, 1.5rem);
+  margin-bottom: var(--space-xl, 2rem);
+}
+
+.brand-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-lg, 0.75rem);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-size: var(--text-xl, 1.25rem);
+  font-weight: 700;
+  color: white;
+  margin-bottom: var(--space-xs, 0.25rem);
+  line-height: 1.2;
+}
+
+.brand-tagline {
+  font-size: var(--text-sm, 0.875rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.hotel-description {
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--space-xl, 2rem);
+}
+
+.certifications {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md, 1rem);
+}
+
+.cert-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+}
+
+.cert-icon {
+  font-size: 1rem;
+  color: var(--luxury-accent, #d4a574);
+}
+
+.cert-text {
+  font-size: var(--text-xs, 0.75rem);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Títulos de sección */
+.section-title {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 600;
+  color: white;
+  margin-bottom: var(--space-xl, 2rem);
+  position: relative;
+  padding-bottom: var(--space-sm, 0.5rem);
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: var(--luxury-accent, #d4a574);
+}
+
+/* Enlaces */
+.links-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md, 1rem);
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: var(--text-sm, 0.875rem);
+  transition: all var(--transition-base, 0.3s ease);
+  padding: var(--space-sm, 0.5rem) 0;
+}
+
+.footer-link:hover {
+  color: var(--luxury-accent, #d4a574);
+  transform: translateX(8px);
+}
+
+.link-icon {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* Información de contacto */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 1.5rem);
+  margin-bottom: var(--space-xl, 2rem);
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md, 1rem);
+}
+
+.contact-icon {
+  font-size: 1.25rem;
+  color: var(--luxury-accent, #d4a574);
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 0.25rem);
+}
+
+.contact-label {
+  font-size: var(--text-xs, 0.75rem);
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.contact-value {
+  font-size: var(--text-sm, 0.875rem);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.contact-link {
+  text-decoration: none;
+  transition: color var(--transition-base, 0.3s ease);
+}
+
+.contact-link:hover {
+  color: var(--luxury-accent, #d4a574);
+}
+
+address.contact-value {
+  font-style: normal;
+}
+
+/* Redes sociales */
+.social-links {
+  margin-top: var(--space-lg, 1.5rem);
+}
+
+.social-title {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: white;
+  margin-bottom: var(--space-md, 1rem);
+}
+
+.social-icons {
+  display: flex;
+  gap: var(--space-md, 1rem);
+}
+
+.social-link {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all var(--transition-base, 0.3s ease);
+  font-size: 1.125rem;
+}
+
+.social-link:hover {
+  background: var(--luxury-accent, #d4a574);
+  border-color: var(--luxury-accent, #d4a574);
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
 }
 
-.cancel-btn {
-  min-width: 150px;
+/* Footer bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-2xl, 3rem) 0;
 }
 
-.form-note {
-  opacity: 0.8;
-  margin-top: 1rem;
+.footer-bottom-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-xl, 2rem);
+  align-items: center;
+}
+
+.copyright {
+  font-size: var(--text-sm, 0.875rem);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.copyright p {
+  margin: 0 0 var(--space-xs, 0.25rem) 0;
+}
+
+.copyright-detail {
+  font-size: var(--text-xs, 0.75rem);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.legal-list {
+  display: flex;
+  gap: var(--space-xl, 2rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.legal-link {
+  font-size: var(--text-sm, 0.875rem);
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color var(--transition-base, 0.3s ease);
+}
+
+.legal-link:hover {
+  color: var(--luxury-accent, #d4a574);
+}
+
+.additional-info {
+  text-align: right;
+}
+
+.award-text {
+  font-size: var(--text-xs, 0.75rem);
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  margin-bottom: var(--space-xs, 0.25rem);
+}
+
+.award-badges {
+  display: flex;
+  gap: var(--space-sm, 0.5rem);
+  justify-content: flex-end;
+}
+
+.award-badge {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--luxury-accent, #d4a574);
+  font-weight: 500;
+}
+
+/* Botón scroll to top */
+.scroll-top-btn {
+  position: fixed;
+  bottom: var(--space-xl, 2rem);
+  right: var(--space-xl, 2rem);
+  width: 56px;
+  height: 56px;
+  background: var(--gradient-gold, linear-gradient(90deg, #D4A574, #8B4513));
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-base, 0.3s ease);
+  box-shadow: var(--shadow-large, 0 8px 32px rgba(0,0,0,0.12));
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.scroll-top-btn--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+  background: var(--luxury-secondary, #8b4513);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xlarge, 0 16px 64px rgba(0,0,0,0.16));
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .footer-container {
+    padding: 0 var(--space-lg, 1.5rem);
+  }
+  
+  .newsletter-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl, 3rem);
+    text-align: center;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl, 3rem);
+  }
+  
+  .footer-about {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-newsletter {
+    padding: var(--space-2xl, 3rem) 0;
+  }
+  
+  .newsletter-title {
+    font-size: var(--text-3xl, 1.875rem);
+  }
+  
+  .newsletter-input-group {
+    flex-direction: column;
+  }
+  
+  .newsletter-btn {
+    align-self: stretch;
+  }
+  
+  .footer-main {
+    padding: var(--space-2xl, 3rem) 0 var(--space-xl, 2rem);
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl, 3rem);
+  }
+  
+  .footer-about {
+    grid-column: span 1;
+  }
+  
+  .footer-bottom-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg, 1.5rem);
+    text-align: center;
+  }
+  
+  .legal-list {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-lg, 1.5rem);
+  }
+  
+  .additional-info {
+    text-align: center;
+  }
+  
+  .award-badges {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 0 var(--space-md, 1rem);
+  }
+  
+  .footer-brand {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-md, 1rem);
+  }
+  
+  .brand-logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .certifications {
+    justify-content: center;
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+  
+  .legal-list {
+    flex-direction: column;
+    gap: var(--space-md, 1rem);
+  }
+  
+  .scroll-top-btn {
+    width: 48px;
+    height: 48px;
+    bottom: var(--space-lg, 1.5rem);
+    right: var(--space-lg, 1.5rem);
+  }
 }
 
 /* Animaciones */
-.form-card {
-  animation: formFadeIn 0.6s ease-out;
+.footer-section {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
 }
 
-.form-fields > * {
-  animation: fieldSlideIn 0.4s ease-out;
-}
+.footer-about { animation-delay: 0.1s; }
+.footer-links { animation-delay: 0.2s; }
+.footer-services { animation-delay: 0.3s; }
+.footer-contact { animation-delay: 0.4s; }
 
-.form-fields > *:nth-child(1) { animation-delay: 0.1s; }
-.form-fields > *:nth-child(2) { animation-delay: 0.15s; }
-.form-fields > *:nth-child(3) { animation-delay: 0.2s; }
-.form-fields > *:nth-child(4) { animation-delay: 0.25s; }
-.form-fields > *:nth-child(5) { animation-delay: 0.3s; }
-.form-fields > *:nth-child(6) { animation-delay: 0.35s; }
-
-@keyframes formFadeIn {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -505,78 +1033,50 @@ defineExpose({
   }
 }
 
-@keyframes fieldSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+/* Tema claro */
+.luxury-footer--light {
+  color: var(--luxury-text-primary, #1a1a1a);
+}
+
+.luxury-footer--light .newsletter-title,
+.luxury-footer--light .section-title,
+.luxury-footer--light .brand-name {
+  color: var(--luxury-text-primary, #1a1a1a);
+}
+
+.luxury-footer--light .newsletter-input {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: var(--luxury-border, #e8e0d4);
+  color: var(--luxury-text-primary, #1a1a1a);
+}
+
+.luxury-footer--light .footer-link,
+.luxury-footer--light .contact-value,
+.luxury-footer--light .legal-link {
+  color: var(--luxury-text-secondary, #4a4a4a);
+}
+
+.luxury-footer--light .social-link {
+  border-color: var(--luxury-border, #e8e0d4);
+  color: var(--luxury-text-secondary, #4a4a4a);
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .luxury-footer,
+  .luxury-footer * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .form-fields .col-6 {
-    grid-column: span 12;
-  }
-  
-  .form-fields .col-4 {
-    grid-column: span 12;
-  }
-  
-  .form-fields .col-3 {
-    grid-column: span 12;
-  }
-  
-  .submit-btn {
-    min-width: 180px;
-  }
-  
-  .cancel-btn {
-    min-width: 120px;
-    margin-left: 0 !important;
-    margin-top: 0.5rem;
-  }
-  
-  .default-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .form-card .q-pa-xl {
-    padding: 1.5rem !important;
-  }
-  
-  .submit-btn {
-    min-width: 160px;
-    width: 100%;
-    max-width: 250px;
-  }
-  
-  .cancel-btn {
-    width: 100%;
-    max-width: 200px;
-  }
-}
-
-/* Temas */
-.form-section.theme-dark {
-  background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
-}
-
-.form-section.theme-dark .form-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.form-section.theme-primary {
-  background: linear-gradient(135deg, rgba(141, 69, 19, 0.05), rgba(160, 82, 45, 0.02));
+/* Focus visible */
+.newsletter-input:focus-visible,
+.footer-link:focus-visible,
+.social-link:focus-visible,
+.legal-link:focus-visible,
+.scroll-top-btn:focus-visible {
+  outline: 2px solid var(--luxury-accent, #d4a574);
+  outline-offset: 2px;
 }
 </style>
