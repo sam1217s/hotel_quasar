@@ -159,7 +159,7 @@ const videoConfig = ref({
 
 // CONFIGURACIÓN DE VIDEOS DE YOUTUBE
 // Opción 1: Por ID directo del video (recomendado)
-const hotelYouTubeId = ref('sSrREk-P_II') // Video ejemplo de hotel de lujo
+const hotelYouTubeId = ref('vSnkGm7X2fA') // Video ejemplo de hotel de lujo
 // Opción 2: Por URL completa (se extrae el ID automáticamente)
 const hotelYouTubeUrl = ref('') // 'https://www.youtube.com/watch?v=M7lc1UVf-VE'
 
